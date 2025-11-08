@@ -26,6 +26,12 @@ onMounted(async () => {
   }
 });
 
+import { useEchoPublic} from "@laravel/echo-vue";
+
+useEchoPublic("public", "TestMessage", (e) => {
+    console.log(e);
+});
+
 async function logout() {
   await authStore.logout();
   router.push('/');

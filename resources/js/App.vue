@@ -1,6 +1,6 @@
 <script setup>
 import { useAuthStore } from './stores/auth';
-import { computed, ref } from 'vue';
+import {computed, inject, onMounted, ref} from 'vue';
 // import logo from '../js/assets/dnd_logo.png' // Uncomment when your logo’s ready
 
 const authStore = useAuthStore();
@@ -8,12 +8,11 @@ const isLoading = computed(() => authStore.loading);
 const mobileOpen = ref(false);
 
 
+import { useEchoPublic } from '@laravel/echo-vue'
 
-
-// window.Echo.channel('test')
-//     .listen('.message.sent', e => {
-//       console.log('🔥 Incoming broadcast:', e.message)
-//     })
+useEchoPublic('public', 'TestMessage', e => {
+    console.log('🔥', e.message)
+})
 </script>
 
 <template>

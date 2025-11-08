@@ -2,6 +2,20 @@
 // import logo from '../assets/dnd_logo.png' // optional
 import { useAuthStore } from '../../stores/auth';
 const auth = useAuthStore();
+
+
+import {echo, useEcho} from '@laravel/echo-vue'
+import {onMounted} from "vue";
+
+const Echo = echo()
+
+onMounted(() => {
+    console.log('🧭 Vue mounted, setting up listener...')
+    Echo.channel('test').listen('TestMessage', (e) => {
+        console.log('📡 got:', e.message)
+    })
+})
+
 </script>
 
 <template>

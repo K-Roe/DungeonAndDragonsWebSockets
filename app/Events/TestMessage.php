@@ -3,28 +3,24 @@
 namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Broadcasting\InteractsWithSockets;
 
-class TestMessage implements ShouldBroadcast
+class TestMessage implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public function __construct(
-        public string $message = 'Hello from Laravel 👋'
-    ) {}
+    public string $message;
 
-    public function broadcastOn(): Channel
+    public function __construct(string $message)
     {
-        // this defines the channel name
-        return new Channel('test');
+        $this->message = $message;
     }
 
-    public function broadcastAs(): string
+    public function broadcastOn(): array
     {
-        // this defines the event name your frontend listens for
-        return 'message.sent';
+        return [new Channel('test')];
     }
 }
