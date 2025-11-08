@@ -14,7 +14,7 @@ Route::post('/register', [RegisterController::class, 'register']);
 
 
 Route::get('/broadcast', function () {
-    broadcast(new TestMessage('🔥 Hello from Laravel!'));
+    broadcast(new TestMessage('🔥 Shot you with a fire Ball!'));
     return 'Event has been sent!';
 });
 

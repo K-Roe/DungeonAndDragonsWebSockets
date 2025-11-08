@@ -65,11 +65,12 @@ onMounted(() => {
             >
               ⚔️ <strong>Join an Existing Campaign</strong> — continue your tale with your party.
             </li>
-            <li
-                class="bg-amber-50/90 p-3 rounded-md border border-yellow-700 shadow-sm hover:bg-amber-100 cursor-pointer"
-            >
-              🏕️ <strong>Host a New Adventure</strong> — forge your own story as Dungeon Master.
-            </li>
+              <router-link
+                  to="/host-adventure"
+                  class="bg-amber-50/90 p-3 rounded-md border border-yellow-700 shadow-sm hover:bg-amber-100 cursor-pointer"
+              >
+                  🏕️ <strong>Host a New Adventure</strong> — forge your own story as Dungeon Master.
+              </router-link>
             <li
                 class="bg-amber-50/90 p-3 rounded-md border border-yellow-700 shadow-sm hover:bg-amber-100 cursor-pointer"
             >
