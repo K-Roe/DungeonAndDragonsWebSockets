@@ -5,5 +5,10 @@ export default [
         component: () => import('../../pages/game/HostAdventure.vue'),
         meta: { requiresAuth: true }
     },
-
+    {
+        path: '/game/:id',
+        name: 'gameRoom',
+        component: () => import('../../pages/game/GameRoom.vue'),
+        meta: { requiresAuth: true }
+    },
 ]

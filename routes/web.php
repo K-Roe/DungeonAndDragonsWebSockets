@@ -1,41 +1,39 @@
 <?php
 
 use App\Events\TestMessage;
-//use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Adventure\AdventureController;
+use App\Http\Controllers\Auth\UserController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Broadcast;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout']);
 Route::post('/register', [RegisterController::class, 'register']);
-//Route::get('/verify-email/{token}', [AuthController::class, 'verifyEmail']);
-
 
 Route::middleware('auth')->group(function () {
+    Route::get('/user', [UserController::class, 'getUser'])->name('user.getUser');
 
-    Route::get('/user', function (Request $request) {
-        return response()->json([
-            'id'    => $request->user()->getId(),
-            'name'  => $request->user()->getName(),
-            'email' => $request->user()->getEmail(),
-        ]);
-    });
-    //game routes
+    // Game routes
     Route::post('/adventures', [AdventureController::class, 'store'])->name('adventures.store');
-//    Route::get('/adventures/active', [AdventureController::class, 'active']);
-//    Route::post('/adventures/{id}/message', [AdventureController::class, 'sendMessage']);
     Route::get('/adventures/active', [AdventureController::class, 'getActiveAdventures'])
         ->name('adventures.active');
+    Route::post('/adventures/{id}/message', [AdventureController::class, 'sendMessage'])
+        ->name('adventures.message');
+
 });
+
+// 🔊 Broadcasting routes — must come before the Vue catch-all
+Broadcast::routes(['middleware' => ['web', 'auth']]);
+require base_path('routes/channels.php');
 
 Route::get('/broadcast', function () {
     broadcast(new TestMessage('🔥 Shot you with a fire Ball!'));
     return 'Event has been sent!';
 });
 
+// Vue catch-all (keep this last)
 Route::get('/{any}', function () {
     return view('app');
 })->where('any', '.*');

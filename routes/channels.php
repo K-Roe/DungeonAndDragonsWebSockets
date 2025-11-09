@@ -2,11 +2,9 @@
 
 use Illuminate\Support\Facades\Broadcast;
 
-//Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
-//    return (int) $user->id === (int) $id;
-//});
 
 
-Broadcast::channel('chat.{id}', function ($user, $id) {
-    return (int) $user->id === (int) $id;
+Broadcast::channel('adventure.{id}', function ($user, $id) {
+    // Authorize if the user can join this adventure
+    return true; // or add logic: $user->adventures->contains($id)
 });

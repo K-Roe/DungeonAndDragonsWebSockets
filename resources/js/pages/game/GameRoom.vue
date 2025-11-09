@@ -1,27 +1,26 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { useEcho } from '@laravel/echo-vue'
+import {echo, useEcho} from '@laravel/echo-vue'
 import axios from 'axios'
 
 const route = useRoute()
-const Echo = useEcho()
 const messages = ref([])
 const newMessage = ref('')
-
 onMounted(() => {
-    const channel = Echo.channel(`adventure.${route.params.id}`)
+    const Echo = echo()
+    console.log('listening on', `adventure.${route.params.id}`)
 
-    channel.listen('AdventureMessage', (e) => {
-        messages.value.push({ sender: e.user, text: e.message })
-    })
+    Echo.private(`adventure.${route.params.id}`)
+        .listen('.AdventureMessage', (e) => {
+            console.log('💬 got it', e)
+            messages.value.push({ sender: e.user, text: e.message })
+        })
 })
 
 async function sendMessage() {
     if (!newMessage.value.trim()) return
-    await axios.post(`/adventures/${route.params.id}/message`, {
-        text: newMessage.value,
-    })
+    await axios.post(`/adventures/${route.params.id}/message`, {text: newMessage.value})
     newMessage.value = ''
 }
 </script>
