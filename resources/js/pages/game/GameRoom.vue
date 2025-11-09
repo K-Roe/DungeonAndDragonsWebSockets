@@ -1,12 +1,13 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import {echo, useEcho} from '@laravel/echo-vue'
+import { echo } from '@laravel/echo-vue'
 import axios from 'axios'
 
 const route = useRoute()
 const messages = ref([])
 const newMessage = ref('')
+
 onMounted(() => {
     const Echo = echo()
     console.log('listening on', `adventure.${route.params.id}`)

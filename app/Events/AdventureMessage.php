@@ -28,7 +28,6 @@ class AdventureMessage implements ShouldBroadcast
 
     public function broadcastOn(): Channel
     {
-
         return new PrivateChannel("adventure.{$this->adventureId}");
     }
 
