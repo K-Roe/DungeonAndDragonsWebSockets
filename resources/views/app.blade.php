@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
 
-    <title>Merlin for All</title>
+    <title>Web Games</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>

@@ -2,10 +2,22 @@
 // import logo from '../assets/dnd_logo.png' // optional
 import { useAuthStore } from '../../stores/auth';
 const auth = useAuthStore();
-
+console.log(auth)
 
 import {echo, useEcho} from '@laravel/echo-vue'
-import {onMounted} from "vue";
+import {onMounted, ref} from "vue";
+import JoinGameModal from "../../components/Game/JoinGameModal.vue";
+
+
+import { useRouter } from 'vue-router'
+
+const showModal = ref(false)
+const router = useRouter()
+
+function joinAdventure(adventure) {
+    showModal.value = false
+    router.push(`/game/${adventure.id}`)
+}
 
 const Echo = echo()
 
@@ -90,18 +102,18 @@ onMounted(() => {
       <section
           class="bg-[url('/parchment-texture.jpg')] bg-cover bg-center border-2 border-yellow-700 rounded-2xl p-6 shadow-2xl hover:shadow-amber-500/30 transition"
       >
-        <h2 class="text-2xl font-bold text-red-900 mb-3 font-uncial">Party Table</h2>
-        <p class="text-gray-800">
-          Pull up a chair. Your friends’ games will appear here — join them when the tavern bell rings.
-        </p>
-        <div class="mt-5 text-center">
-          <router-link
-              to="/join-game"
-              class="bg-amber-600 hover:bg-amber-500 text-gray-900 font-bold px-4 py-2 rounded-lg shadow-md transition transform hover:scale-105"
-          >
-            Browse Games
-          </router-link>
-        </div>
+          <h2 class="text-2xl font-bold text-red-900 mb-3 font-uncial">Party Table</h2>
+          <p class="text-gray-800">Pull up a chair. Your friends’ games will appear here — join them when the tavern bell rings.</p>
+          <div class="mt-5 text-center">
+              <button
+                  @click="showModal = true"
+                  class="bg-amber-600 hover:bg-amber-500 text-gray-900 font-bold px-4 py-2 rounded-lg shadow-md transition transform hover:scale-105"
+              >
+                  Browse Games
+              </button>
+          </div>
+
+          <JoinGameModal v-if="showModal" @close="showModal = false" @join="joinAdventure" />
       </section>
     </main>
 

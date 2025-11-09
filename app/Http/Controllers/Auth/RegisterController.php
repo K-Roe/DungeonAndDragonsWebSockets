@@ -2,15 +2,24 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Entities\User;
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class RegisterController extends Controller
 {
+    private EntityManagerInterface $em;
+
+    public function __construct(EntityManagerInterface $em)
+    {
+        $this->em = $em;
+    }
+
     /**
      * Handle user registration.
      */
@@ -18,23 +27,33 @@ class RegisterController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'email' => ['required', 'string', 'email', 'max:255'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
-        // Create user
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'remember_token' => Str::random(10),
-        ]);
+        // check manually for existing user (Doctrine doesn’t know Laravel’s validation rules)
+        $existingUser = $this->em->getRepository(User::class)
+            ->findOneBy(['email' => $validated['email']]);
 
-        // Optional: auto-login right after registration
+        if ($existingUser) {
+            throw ValidationException::withMessages([
+                'email' => ['A user with this email already exists.'],
+            ]);
+        }
+
+        // create and persist user
+        $user = new User(
+            $validated['name'],
+            $validated['email'],
+            Hash::make($validated['password']),
+            Str::random(10)
+        );
+
+        $this->em->persist($user);
+        $this->em->flush();
+
+        // optional: auto login
         // Auth::login($user);
-
-        // If you want to send verification emails later, use:
-        // $user->sendEmailVerificationNotification();
 
         return response()->json([
             'message' => 'Registration successful!',

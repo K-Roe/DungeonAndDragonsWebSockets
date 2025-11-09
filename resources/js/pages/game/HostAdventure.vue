@@ -10,9 +10,15 @@ const maxPlayers = ref(4)
 const difficulty = ref('Normal')
 const isPrivate = ref(false)
 
-function startAdventure() {
-    // TODO: Save to backend later (via axios)
+async function saveAdventure() {
     console.log('✨ New Adventure Created:', {
+        title: title.value,
+        description: description.value,
+        maxPlayers: maxPlayers.value,
+        isPrivate: isPrivate.value,
+    })
+
+    await axios.post('/adventures', {
         title: title.value,
         description: description.value,
         maxPlayers: maxPlayers.value,
@@ -34,7 +40,7 @@ function startAdventure() {
                 🏕️ Host a New Adventure
             </h1>
 
-            <form @submit.prevent="startAdventure" class="space-y-5">
+            <form @submit.prevent="saveAdventure" class="space-y-5">
                 <div>
                     <label class="block mb-1 font-semibold text-red-900">Adventure Title</label>
                     <input
@@ -66,19 +72,6 @@ function startAdventure() {
                             max="8"
                             class="w-full px-4 py-2 border border-yellow-700 rounded-lg bg-amber-50/80 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-800"
                         />
-                    </div>
-
-                    <div>
-                        <label class="block mb-1 font-semibold text-red-900">Difficulty</label>
-                        <select
-                            v-model="difficulty"
-                            class="w-full px-4 py-2 border border-yellow-700 rounded-lg bg-amber-50/80 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-800"
-                        >
-                            <option>Easy</option>
-                            <option>Normal</option>
-                            <option>Hard</option>
-                            <option>Epic</option>
-                        </select>
                     </div>
                 </div>
 

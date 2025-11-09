@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Entities\User;
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
@@ -14,14 +16,14 @@ class LoginController extends Controller
     /**
      * Handle user login.
      */
-    public function login(Request $request): JsonResponse
+    public function login(Request $request, EntityManagerInterface $em): JsonResponse
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
+            'email' => 'required|email',
+            'password' => 'required',
         ]);
 
-        $user = User::where('email', $credentials['email'])->first();
+        $user = $em->getRepository(User::class)->findOneBy(['email' => $credentials['email']]);
 
         if (!$user) {
             throw ValidationException::withMessages([
@@ -29,24 +31,30 @@ class LoginController extends Controller
             ]);
         }
 
-        // Uncomment if you plan to add email verification later
-        // if (!$user->hasVerifiedEmail()) {
+        // if you have verification logic, you can re-enable it here
+        // if (!$user->isVerified()) {
         //     throw ValidationException::withMessages([
         //         'email' => ['Please verify your email before logging in.'],
         //     ]);
         // }
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-
-            return response()->json([
-                'message' => 'Login successful',
-                'user' => Auth::user(),
+        // manual password check
+        if (!Hash::check($credentials['password'], $user->getAuthPassword())) {
+            throw ValidationException::withMessages([
+                'email' => ['The provided credentials are incorrect.'],
             ]);
         }
 
-        throw ValidationException::withMessages([
-            'email' => ['The provided credentials are incorrect.'],
+        // log user in through Laravel’s guard
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        // call any post-login methods you need (example below)
+        // $user->getCurrentSubscription();
+
+        return response()->json([
+            'message' => 'Login successful',
+            'user' => $user,
         ]);
     }
 
@@ -56,7 +64,6 @@ class LoginController extends Controller
     public function logout(Request $request): JsonResponse
     {
         Auth::logout();
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

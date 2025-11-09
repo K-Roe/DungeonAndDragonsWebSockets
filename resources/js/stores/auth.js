@@ -76,8 +76,9 @@ export const useAuthStore = defineStore('auth', () => {
         loading.value = true
         try {
             await ensureCsrf()
-            const response = await axios.get('/api/user', { withCredentials: true })
+            const response = await axios.get('/user', { withCredentials: true })
             user.value = response.data
+            console.log(user.value)
             authenticated.value = true
         } catch (error) {
             user.value = null
