@@ -7,6 +7,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class MobileAuthController
@@ -27,18 +28,22 @@ class MobileAuthController
         }
 
         // Sanctum token (for mobile only)
-        $token = $user->createToken('mobile')->plainTextToken;
-
+        $token = Str::random(60);
+        $user->setApiToken($token);
+        $em->flush();
         return response()->json([
             'user' => $user->jsonSerialize(),
             'token' => $token
         ]);
     }
 
-    public function logout(Request $request)
+    public function logout(Request $request, EntityManagerInterface $em)
     {
-        $request->user()->tokens()->delete();
-
+        $user = $request->user();
+        if ($user) {
+            $user->setApiToken(null);
+            $em->flush();
+        }
         return response()->json(['message' => 'Logged out']);
     }
 
@@ -62,9 +67,9 @@ class MobileAuthController
         );
 
         $em->persist($user);
+        $token = Str::random(60);
+        $user->setApiToken($token);
         $em->flush();
-
-        $token = $user->createToken('mobile')->plainTextToken;
 
         return response()->json([
             'user' => $user->jsonSerialize(),

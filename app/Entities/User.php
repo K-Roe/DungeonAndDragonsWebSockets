@@ -2,19 +2,14 @@
 
 namespace App\Entities;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Illuminate\Contracts\Auth\Authenticatable;
 use JsonSerializable;
-use Laravel\Sanctum\HasApiTokens;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'users')]
 class User implements Authenticatable, JsonSerializable
 {
-    use HasApiTokens;
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
@@ -32,15 +27,15 @@ class User implements Authenticatable, JsonSerializable
     #[ORM\Column(type: 'string', nullable: true)]
     private ?string $rememberToken = null;
 
-    #[ORM\OneToMany(mappedBy: 'tokenable', targetEntity: PersonalAccessToken::class, cascade: ['persist', 'remove'])]
-    private Collection $tokens;
+    // 🔥 Custom API token for mobile auth (replaces Sanctum)
+    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    private ?string $apiToken = null;
 
     public function __construct(string $name, string $email, string $password)
     {
-        $this->name = $name;
-        $this->email = $email;
+        $this->name     = $name;
+        $this->email    = $email;
         $this->password = $password;
-        $this->tokens = new ArrayCollection();
     }
 
     // ---- Auth ----
@@ -54,28 +49,34 @@ class User implements Authenticatable, JsonSerializable
 
     // ---- Getters / Setters ----
     public function getId(): int { return $this->id; }
+
     public function getName(): string { return $this->name; }
     public function setName(string $name): void { $this->name = $name; }
+
     public function getEmail(): string { return $this->email; }
     public function setEmail(string $email): void { $this->email = $email; }
+
     public function setPassword(string $password): void { $this->password = $password; }
+
+    // ---- API Token helpers (custom, not Sanctum) ----
+    public function getApiToken(): ?string
+    {
+        return $this->apiToken;
+    }
+
+    public function setApiToken(?string $token): self
+    {
+        $this->apiToken = $token;
+        return $this;
+    }
 
     // ---- JSON ----
     public function jsonSerialize(): array
     {
         return [
-            'id' => $this->id,
-            'name' => $this->name,
+            'id'    => $this->id,
+            'name'  => $this->name,
             'email' => $this->email,
-        ];
-    }
-
-    public function createNewToken(string $name = 'mobile'): array
-    {
-        $token = $this->createToken($name);
-        return [
-            'plain' => $token->plainTextToken,
-            'hashed' => $token->accessToken->getToken(),
         ];
     }
 }
