@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\MobileAuthMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,7 +14,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
+            // ⭐ Your custom middleware
+            'mobile.auth' => \App\Http\Middleware\MobileAuthMiddleware::class,
+        ]);     //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
