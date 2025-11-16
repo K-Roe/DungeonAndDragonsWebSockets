@@ -7,11 +7,14 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Illuminate\Contracts\Auth\Authenticatable;
 use JsonSerializable;
+use Laravel\Sanctum\HasApiTokens;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'users')]
 class User implements Authenticatable, JsonSerializable
 {
+    use HasApiTokens;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
@@ -23,53 +26,33 @@ class User implements Authenticatable, JsonSerializable
     #[ORM\Column(type: 'string', length: 255, unique: true)]
     private string $email;
 
-    #[ORM\Column(type: 'datetime', nullable: true)]
-    private ?\DateTimeInterface $emailVerifiedAt = null;
-
     #[ORM\Column(type: 'string', length: 255)]
     private string $password;
 
     #[ORM\Column(type: 'string', nullable: true)]
     private ?string $rememberToken = null;
 
-    #[ORM\Column(type: 'datetime', nullable: true)]
-    private ?\DateTimeInterface $createdAt = null;
-
-    #[ORM\Column(type: 'datetime', nullable: true)]
-    private ?\DateTimeInterface $updatedAt = null;
-
     #[ORM\OneToMany(mappedBy: 'tokenable', targetEntity: PersonalAccessToken::class, cascade: ['persist', 'remove'])]
     private Collection $tokens;
 
-
-    // --- Laravel Auth methods ---
-
-    /**
-     * @param string $name
-     * @param string $email
-     * @param string $password
-     * @param string|null $rememberToken
-     */
-    public function __construct(string $name, string $email, string $password, ?string $rememberToken = null)
+    public function __construct(string $name, string $email, string $password)
     {
         $this->name = $name;
         $this->email = $email;
         $this->password = $password;
-        $this->rememberToken = $rememberToken;
+        $this->tokens = new ArrayCollection();
     }
 
+    // ---- Auth ----
     public function getAuthIdentifierName(): string { return 'id'; }
     public function getAuthIdentifier(): mixed { return $this->id; }
     public function getAuthPassword(): string { return $this->password; }
     public function getAuthPasswordName(): string { return 'password'; }
     public function getRememberToken(): ?string { return $this->rememberToken; }
-    public function setRememberToken($value)
-    {
-        $this->rememberToken = $value;
-    }
+    public function setRememberToken($value): void { $this->rememberToken = $value; }
     public function getRememberTokenName(): string { return 'remember_token'; }
 
-    // --- getters/setters ---
+    // ---- Getters / Setters ----
     public function getId(): int { return $this->id; }
     public function getName(): string { return $this->name; }
     public function setName(string $name): void { $this->name = $name; }
@@ -77,13 +60,22 @@ class User implements Authenticatable, JsonSerializable
     public function setEmail(string $email): void { $this->email = $email; }
     public function setPassword(string $password): void { $this->password = $password; }
 
-    // --- JSON serialization ---
+    // ---- JSON ----
     public function jsonSerialize(): array
     {
         return [
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
+        ];
+    }
+
+    public function createNewToken(string $name = 'mobile'): array
+    {
+        $token = $this->createToken($name);
+        return [
+            'plain' => $token->plainTextToken,
+            'hashed' => $token->accessToken->getToken(),
         ];
     }
 }

@@ -4,7 +4,6 @@ import { useAuthStore } from '../../stores/auth';
 const auth = useAuthStore();
 console.log(auth)
 
-import {echo, useEcho} from '@laravel/echo-vue'
 import {onMounted, ref} from "vue";
 import JoinGameModal from "../../components/Game/JoinGameModal.vue";
 
@@ -19,14 +18,7 @@ function joinAdventure(adventure) {
     router.push(`/game/${adventure.id}`)
 }
 
-const Echo = echo()
 
-onMounted(() => {
-    console.log('🧭 Vue mounted, setting up listener...')
-    Echo.channel('test').listen('TestMessage', (e) => {
-        console.log('📡 got:', e.message)
-    })
-})
 
 </script>
 
